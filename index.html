@@ -1,10 +1,392 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>TechFix911</title>
-    <meta http-equiv="refresh" content="0; url=privacy.html">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechFix 916 - YouTube Connect</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 600px;
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            font-size: 50px;
+            box-shadow: 0 10px 40px rgba(255,0,0,0.3);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        p {
+            color: #94a3b8;
+            font-size: 1.2em;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        
+        .youtube-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            color: white;
+            text-decoration: none;
+            padding: 18px 36px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255,0,0,0.4);
+        }
+        
+        .youtube-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255,0,0,0.5);
+        }
+        
+        .youtube-btn i {
+            font-size: 1.3em;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+        }
+        
+        .feature {
+            padding: 25px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+        
+        .feature:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+        
+        .feature h3 {
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+        
+        .feature p {
+            font-size: 0.9em;
+            color: #64748b;
+            margin: 0;
+        }
+        
+        .status {
+            margin-top: 30px;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(0,255,0,0.1);
+            border: 1px solid rgba(0,255,0,0.3);
+            display: none;
+        }
+        
+        .status.show {
+            display: block;
+        }
+        
+        .status.error {
+            background: rgba(255,0,0,0.1);
+            border: 1px solid rgba(255,0,0,0.3);
+        }
+        
+        .gsi-container {
+            margin: 20px 0;
+        }
+        
+        .divider {
+            margin: 30px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #64748b;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-    <p>Redirecting to <a href="privacy.html">Privacy Policy</a>...</p>
+    <div class="container">
+        <div class="logo">
+            <i class="fas fa-play"></i>
+        </div>
+        
+        <h1>TechFix 916</h1>
+        <p>Connect your YouTube channel to enable live streaming, analytics, and video management all in one place.</p>
+        
+        <!-- Google Sign-In Button (Recommended Method) -->
+        <div id="g_id_onload"
+             data-client_id="674010611547-21a00nr4mc7bggkg1kend946av665810.apps.googleusercontent.com"
+             data-context="signin"
+             data-ux_mode="popup"
+             data-login_uri="https://techfix916.com/callback"
+             data-auto_prompt="false"
+             data-callback="handleGoogleSignIn">
+        </div>
+        
+        <div class="gsi-container">
+            <div class="g_id_signin"
+                 data-type="standard"
+                 data-shape="pill"
+                 data-theme="filled_black"
+                 data-text="signin_with"
+                 data-size="large"
+                 data-logo_alignment="left"
+                 data-width="300">
+            </div>
+        </div>
+        
+        <div class="divider">or</div>
+        
+        <!-- Fallback: Manual OAuth with PKCE -->
+        <button class="youtube-btn" onclick="connectYouTube()">
+            <i class="fab fa-youtube"></i>
+            Connect with YouTube API
+        </button>
+        
+        <div id="status" class="status">
+            <i class="fas fa-check-circle"></i>
+            <span id="statusText">Connecting...</span>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <h3>Analytics</h3>
+                <p>View detailed stats</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📹</div>
+                <h3>Upload</h3>
+                <p>Manage your videos</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔴</div>
+                <h3>Live Stream</h3>
+                <p>Start live broadcasts</p>
+            </div>
+        </div>
+        
+        <div style="margin-top: 40px; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 10px; font-size: 0.9em; color: #64748b;">
+            <p style="margin: 0; font-size: 0.9em;">
+                <i class="fas fa-shield-alt" style="color: #10b981; margin-right: 8px;"></i>
+                Secure connection via Google OAuth 2.0
+            </p>
+            <p style="margin: 10px 0 0 0; font-size: 0.8em;">
+                Domain: techfix916.com | 
+                <a href="https://techfix916.com/privacy.html" style="color: #60a5fa;">Privacy Policy</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            CLIENT_ID: '674010611547-21a00nr4mc7bggkg1kend946av665810.apps.googleusercontent.com',
+            REDIRECT_URI: 'https://techfix916.com/callback',
+            SCOPE: 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.upload',
+            DOMAIN: 'techfix916.com'
+        };
+
+        // Show status message
+        function showStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            const statusText = document.getElementById('statusText');
+            statusText.textContent = message;
+            status.className = 'status show' + (isError ? ' error' : '');
+        }
+
+        // Handle Google Identity Services Sign-In (Recommended)
+        function handleGoogleSignIn(response) {
+            console.log('Google Sign-In Success:', response);
+            
+            // response.credential contains the JWT ID token
+            const idToken = response.credential;
+            
+            // Decode JWT to get user info (optional)
+            const payload = JSON.parse(atob(idToken.split('.')[1]));
+            console.log('User:', payload.name, payload.email);
+            
+            showStatus(`Welcome ${payload.name}! Redirecting...`);
+            
+            // Store token securely (in practice, send to your backend)
+            sessionStorage.setItem('google_id_token', idToken);
+            
+            // Redirect to dashboard or process the token
+            setTimeout(() => {
+                window.location.href = '/dashboard.html';
+            }, 1500);
+        }
+
+        // Generate PKCE Code Verifier
+        function generateCodeVerifier() {
+            const array = new Uint8Array(32);
+            crypto.getRandomValues(array);
+            return base64URLEncode(array);
+        }
+
+        // Generate PKCE Code Challenge
+        async function generateCodeChallenge(verifier) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(verifier);
+            const digest = await crypto.subtle.digest('SHA-256', data);
+            return base64URLEncode(new Uint8Array(digest));
+        }
+
+        // Base64URL Encode
+        function base64URLEncode(str) {
+            return btoa(String.fromCharCode.apply(null, str))
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=/g, '');
+        }
+
+        // Connect with YouTube API (PKCE Flow)
+        async function connectYouTube() {
+            showStatus('Preparing secure connection...');
+            
+            try {
+                // Generate and store PKCE verifier
+                const codeVerifier = generateCodeVerifier();
+                sessionStorage.setItem('pkce_code_verifier', codeVerifier);
+                
+                // Generate code challenge
+                const codeChallenge = await generateCodeChallenge(codeVerifier);
+                
+                // Build OAuth URL with PKCE (Secure, Google-compliant)
+                const params = new URLSearchParams({
+                    client_id: CONFIG.CLIENT_ID,
+                    redirect_uri: CONFIG.REDIRECT_URI,
+                    response_type: 'code',
+                    scope: CONFIG.SCOPE,
+                    prompt: 'consent',
+                    access_type: 'offline',
+                    code_challenge: codeChallenge,
+                    code_challenge_method: 'S256',
+                    state: generateState()
+                });
+                
+                const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+                
+                console.log('Redirecting to OAuth...');
+                window.location.href = oauthUrl;
+                
+            } catch (error) {
+                console.error('OAuth Error:', error);
+                showStatus('Connection failed. Please try again.', true);
+            }
+        }
+
+        // Generate state parameter for CSRF protection
+        function generateState() {
+            const state = generateCodeVerifier();
+            sessionStorage.setItem('oauth_state', state);
+            return state;
+        }
+
+        // Check for OAuth callback on page load
+        async function handleCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const error = urlParams.get('error');
+            const state = urlParams.get('state');
+            
+            if (error) {
+                showStatus(`Error: ${error}`, true);
+                return;
+            }
+            
+            if (code) {
+                // Verify state to prevent CSRF
+                const savedState = sessionStorage.getItem('oauth_state');
+                if (state !== savedState) {
+                    showStatus('Security error: Invalid state', true);
+                    return;
+                }
+                
+                showStatus('Completing connection...');
+                
+                // In production: Send code to your backend
+                // Backend exchanges code for tokens using client_secret
+                console.log('Authorization code received:', code);
+                
+                // For demo: Show success (in real app, POST to backend)
+                showStatus('Authorization successful! Complete on server...');
+                
+                // Clear URL parameters
+                window.history.replaceState({}, document.title, '/');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            handleCallback();
+            
+            // Check if already logged in
+            const token = sessionStorage.getItem('google_id_token');
+            if (token && window.location.pathname === '/') {
+                // Optional: Auto-redirect to dashboard
+                // window.location.href = '/dashboard.html';
+            }
+        });
+
+        // Expose handler to global scope for Google callback
+        window.handleGoogleSignIn = handleGoogleSignIn;
+    </script>
 </body>
 </html>
