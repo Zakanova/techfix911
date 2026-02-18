@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Account Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --neon-cyan: #00f3ff; --neon-purple: #bc13fe; --neon-green: #0aff0a; --neon-red: #ff0040; --dark-bg: #0a0a0f; --glass: rgba(255,255,255,0.05); }
+        body { font-family: 'Inter', sans-serif; background: var(--dark-bg); color: #fff; overflow-x: hidden; user-select: none; -webkit-user-select: none; }
+        .font-cyber { font-family: 'Orbitron', sans-serif; }
+        .cyber-grid { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(0,243,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,243,255,0.03) 1px, transparent 1px); background-size: 50px 50px; z-index: -2; animation: gridMove 20s linear infinite; }
+        @keyframes gridMove { 0% { transform: perspective(500px) rotateX(60deg) translateY(0); } 100% { transform: perspective(500px) rotateX(60deg) translateY(50px); } }
+        .floating-orbs { position: fixed; width: 100%; height: 100%; overflow: hidden; z-index: -1; pointer-events: none; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4; animation: float 20s infinite ease-in-out; }
+        .orb-1 { width: 400px; height: 400px; background: var(--neon-cyan); top: -10%; left: -10%; }
+        .orb-2 { width: 300px; height: 300px; background: var(--neon-purple); bottom: -10%; right: -10%; animation-delay: 5s; }
+        .orb-3 { width: 250px; height: 250px; background: var(--neon-green); top: 50%; left: 50%; animation-delay: 10s; }
+        @keyframes float { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(30px,-30px) scale(1.1); } 66% { transform: translate(-20px,20px) scale(0.9); } }
+        .glass-card { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37); }
+        .live-pulse { animation: livePulse 2s infinite; }
+        @keyframes livePulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,0,64,0.7); } 50% { box-shadow: 0 0 20px 10px rgba(255,0,64,0); } }
+        .connection-flow { position: relative; }
+        .connection-line { position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-purple), transparent); transform: translateY(-50%); z-index: 0; }
+        .step-active { background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple)); border-color: transparent; }
+        .step-completed { background: var(--neon-green); border-color: transparent; }
+        .oauth-button { transition: all 0.3s; position: relative; overflow: hidden; }
+        .oauth-button:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .sync-indicator { animation: syncSpin 2s linear infinite; }
+        @keyframes syncSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .account-card { transition: all 0.3s; }
+        .account-card:hover { transform: translateX(5px); border-left-width: 4px; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(var(--neon-cyan), var(--neon-purple)); border-radius: 4px; }
+    </style>
+</head>
+<body class="min-h-screen" oncontextmenu="return false;">
+    <div id="securityBlock" class="fixed inset-0 z-50 bg-gray-900 flex items-center justify-center hidden">
+        <div class="text-center p-8">
+            <h1 class="text-4xl font-bold text-red-500 mb-4">🚫 Access Denied</h1>
+            <p class="text-gray-400">Security verification failed.</p>
+        </div>
+    </div>
+
+    <div class="cyber-grid"></div>
+    <div class="floating-orbs"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+
+    <nav class="fixed top-0 w-full z-40 glass-card border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-400 to-purple-600 flex items-center justify-center">
+                        <i class="fas fa-microchip text-white text-xl"></i>
+                    </div>
+                    <span class="font-cyber text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">TechFix 911</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-green-400 live-pulse"><i class="fas fa-shield-alt text-xl"></i></div>
+                    <button onclick="logout()" class="text-gray-400 hover:text-white"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-24 pb-12 px-4 max-w-6xl mx-auto">
+        <div class="glass-card rounded-2xl p-6 mb-8 border border-green-500/30 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-green-500/10 rounded-full blur-3xl"></div>
+            <div class="flex items-center justify-between relative z-10">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center border-2 border-green-500">
+                        <i class="fas fa-lock text-3xl text-green-400"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white mb-1">Secure Connection</h1>
+                        <p class="text-green-400 text-sm">Multi-layer security active</p>
+                    </div>
+                </div>
+                <div class="text-right hidden md:block">
+                    <div class="text-3xl font-bold text-cyan-400">100%</div>
+                    <div class="text-xs text-gray-400">Security Score</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-8 mb-8">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-plug text-cyan-400"></i>Connection Progress</h2>
+            <div class="connection-flow flex justify-between items-center relative px-4">
+                <div class="connection-line"></div>
+                <div class="relative z-10 flex flex-col items-center gap-2">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-400 to-purple-600 flex items-center justify-center text-white font-bold step-active" id="step1"><i class="fas fa-check"></i></div>
+                    <span class="text-xs text-gray-400">Verify</span>
+                </div>
+                <div class="relative z-10 flex flex-col items-center gap-2">
+                    <div class="w-12 h-12 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center text-white font-bold" id="step2">2</div>
+                    <span class="text-xs text-gray-400">Connect</span>
+                </div>
+                <div class="relative z-10 flex flex-col items-center gap-2">
+                    <div class="w-12 h-12 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center text-white font-bold" id="step3">3</div>
+                    <span class="text-xs text-gray-400">Authorize</span>
+                </div>
+                <div class="relative z-10 flex flex-col items-center gap-2">
+                    <div class="w-12 h-12 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center text-white font-bold" id="step4">4</div>
+                    <span class="text-xs text-gray-400">Sync</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-8">
+            <div class="space-y-6">
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="fas fa-link text-purple-400"></i>Connect Account</h3>
+                    <div class="space-y-4">
+                        <button onclick="initiateYouTubeOAuth()" class="oauth-button w-full glass-card p-4 rounded-xl flex items-center gap-4 hover:bg-red-500/10 border border-transparent hover:border-red-500/50 group">
+                            <div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center text-white text-xl"><i class="fab fa-youtube"></i></div>
+                            <div class="flex-1 text-left">
+                                <div class="font-bold text-white group-hover:text-red-400 transition">YouTube</div>
+                                <div class="text-sm text-gray-400">Connect your channel</div>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-600 group-hover:text-red-400 transition"></i>
+                        </button>
+                        <button onclick="comingSoon('TikTok')" class="oauth-button w-full glass-card p-4 rounded-xl flex items-center gap-4 opacity-60 cursor-not-allowed">
+                            <div class="w-12 h-12 rounded-full bg-black border border-[#ff0050] flex items-center justify-center text-[#ff0050] text-xl"><i class="fab fa-tiktok"></i></div>
+                            <div class="flex-1 text-left"><div class="font-bold text-gray-400">TikTok</div><div class="text-sm text-gray-500">Coming soon</div></div>
+                            <i class="fas fa-lock text-gray-600"></i>
+                        </button>
+                        <button onclick="comingSoon('Google')" class="oauth-button w-full glass-card p-4 rounded-xl flex items-center gap-4 opacity-60 cursor-not-allowed">
+                            <div class="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-gray-400 text-xl"><i class="fab fa-google"></i></div>
+                            <div class="flex-1 text-left"><div class="font-bold text-gray-400">Google</div><div class="text-sm text-gray-500">Coming soon</div></div>
+                            <i class="fas fa-lock text-gray-600"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="fas fa-network-wired text-green-400"></i>Active Connections</h3>
+                    <div id="connectionsList" class="space-y-3">
+                        <div id="youtubeStatus" class="account-card glass-card p-4 rounded-lg border-l-4 border-gray-600 relative overflow-hidden">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center"><i class="fab fa-youtube text-gray-400"></i></div>
+                                    <div><div class="font-bold text-gray-400">YouTube</div><div class="text-xs text-gray-500">Not connected</div></div>
+                                </div>
+                                <span class="text-xs text-gray-500">● Offline</span>
+                            </div>
+                        </div>
+                        <div id="goLiveSection" class="hidden mt-4">
+                            <a href="/broadcast.html" class="block w-full glass-card p-4 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 transition group">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center live-pulse"><i class="fas fa-broadcast-tower text-white text-xl"></i></div>
+                                        <div>
+                                            <div class="font-bold text-white text-lg group-hover:text-red-400 transition">GO LIVE</div>
+                                            <div class="text-sm text-gray-400">Start streaming to YouTube</div>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-arrow-right text-red-400 text-xl group-hover:translate-x-2 transition"></i>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="fas fa-exchange-alt text-purple-400"></i>Data Synchronization</h3>
+                    <div class="text-center text-gray-400 py-8"><i class="fas fa-plug text-4xl mb-3 opacity-30"></i><p>Connect an account to see sync status</p></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="oauthModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-md"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg">
+            <div class="glass-card rounded-2xl p-8 border border-cyan-500/30">
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-cyan-400 to-purple-600 flex items-center justify-center mx-auto mb-4 relative">
+                        <i class="fas fa-shield-alt text-3xl text-white"></i>
+                        <div class="absolute inset-0 rounded-full border-2 border-cyan-400 animate-ping opacity-30"></div>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-2">Connecting to YouTube</h2>
+                    <p class="text-gray-400 text-sm">Secure OAuth 2.0 with PKCE</p>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3 text-sm text-gray-400"><i class="fas fa-check-circle text-green-400"></i><span>Preparing secure connection...</span></div>
+                    <div class="flex items-center gap-3 text-sm text-gray-400"><i class="fas fa-circle-notch fa-spin text-cyan-400"></i><span>Redirecting to Google...</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // California time check (2-7 PM)
+        function checkTimeAccess() {
+            const now = new Date();
+            const TIMEZONE_OFFSET = -7; // PDT
+            const ACCESS_START = 14; // 2:00 PM
+            const ACCESS_END = 19;   // 7:00 PM
+            
+            const utcHour = now.getUTCHours();
+            const californiaHour = (utcHour + TIMEZONE_OFFSET + 24) % 24;
+            const day = now.getDay();
+            
+            const isWeekday = day >= 1 && day <= 5;
+            const isWorkHours = californiaHour >= ACCESS_START && californiaHour < ACCESS_END;
+            
+            if (!isWeekday || !isWorkHours) {
+                document.getElementById('securityBlock').classList.remove('hidden');
+                document.getElementById('securityBlock').innerHTML = `
+                    <div class="text-center p-8">
+                        <h1 class="text-4xl font-bold text-yellow-500 mb-4">🔒</h1>
+                        <h2 class="text-2xl font-bold mb-2">Outside Access Hours</h2>
+                        <p class="text-gray-400">Available: Monday-Friday</p>
+                        <p class="text-cyan-400 mt-2">2:00 PM - 7:00 PM (California Time)</p>
+                        <p class="text-gray-600 text-sm mt-4">Current CA Time: ${californiaHour}:00</p>
+                    </div>
+                `;
+                return false;
+            }
+            return true;
+        }
+
+        // Device fingerprint
+        async function getDeviceFingerprint() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.textBaseline = 'top';
+            ctx.font = '14px Arial';
+            ctx.fillText('TechFix 911', 2, 2);
+            
+            const data = [navigator.userAgent, navigator.language, screen.colorDepth, screen.width + 'x' + screen.height, screen.availWidth + 'x' + screen.availHeight, new Date().getTimezoneOffset(), !!window.localStorage, !!window.sessionStorage, canvas.toDataURL()].join('|');
+            
+            let hash = 0;
+            for (let i = 0; i < data.length; i++) {
+                const char = data.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return hash.toString(16);
+        }
+
+        // SET YOUR DEVICE FINGERPRINT HERE AFTER FIRST RUN
+        const ALLOWED_FINGERPRINT = 'your-device-fingerprint-here';
+
+        async function checkDevice() {
+            const current = await getDeviceFingerprint();
+            console.log('Device fingerprint:', current);
+            
+            if (ALLOWED_FINGERPRINT === 'your-device-fingerprint-here') {
+                console.warn('FIRST RUN: Copy fingerprint above into ALLOWED_FINGERPRINT');
+                return true;
+            }
+            
+            if (current !== ALLOWED_FINGERPRINT) {
+                document.getElementById('securityBlock').classList.remove('hidden');
+                document.getElementById('securityBlock').innerHTML = `
+                    <div class="text-center p-8">
+                        <h1 class="text-4xl font-bold text-red-500 mb-4">🚫</h1>
+                        <h2 class="text-2xl font-bold mb-2">Unauthorized Device</h2>
+                        <p class="text-gray-400">This device is not registered.</p>
+                        <p class="text-xs text-gray-600 mt-4 font-mono">ID: ${current}</p>
+                    </div>
+                `;
+                return false;
+            }
+            return true;
+        }
+
+        const CONFIG = {
+            CLIENT_ID: '674010611547-21a00nr4mc7bggkg1kend946av665810.apps.googleusercontent.com',
+            REDIRECT_URI: 'https://techfix911.com/callback.html',
+            SCOPE: 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.upload'
+        };
+
+        let currentStep = 1;
+
+        function base64URLEncode(str) {
+            return btoa(String.fromCharCode.apply(null, str)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+        }
+
+        function generateCodeVerifier() {
+            const array = new Uint8Array(32);
+            crypto.getRandomValues(array);
+            return base64URLEncode(array);
+        }
+
+        async function generateCodeChallenge(verifier) {
+            const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
+            return base64URLEncode(new Uint8Array(digest));
+        }
+
+        async function initiateYouTubeOAuth() {
+            updateStep(2);
+            document.getElementById('oauthModal').classList.remove('hidden');
+            
+            const codeVerifier = generateCodeVerifier();
+            sessionStorage.setItem('pkce_code_verifier', codeVerifier);
+            const codeChallenge = await generateCodeChallenge(codeVerifier);
+            
+            const params = new URLSearchParams({
+                client_id: CONFIG.CLIENT_ID,
+                redirect_uri: CONFIG.REDIRECT_URI,
+                response_type: 'code',
+                scope: CONFIG.SCOPE,
+                prompt: 'consent',
+                access_type: 'offline',
+                code_challenge: codeChallenge,
+                code_challenge_method: 'S256'
+            });
+            
+            setTimeout(() => {
+                updateStep(3);
+                window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
+            }, 1500);
+        }
+
+        function updateStep(step) {
+            currentStep = step;
+            for (let i = 1; i <= 4; i++) {
+                const el = document.getElementById(`step${i}`);
+                if (i < step) {
+                    el.classList.add('step-completed');
+                    el.innerHTML = '<i class="fas fa-check"></i>';
+                } else if (i === step) {
+                    el.classList.add('step-active');
+                    el.innerHTML = i;
+                } else {
+                    el.classList.remove('step-active', 'step-completed');
+                    el.innerHTML = i;
+                }
+            }
+        }
+
+        function comingSoon(platform) { alert(`${platform} integration coming soon!`); }
+
+        function handleCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const error = urlParams.get('error');
+            
+            if (error) {
+                alert('OAuth Error: ' + error);
+                showDisconnectedState();
+                return;
+            }
+            
+            if (code) {
+                updateStep(4);
+                showConnectedState();
+                sessionStorage.setItem('youtube_connected', 'true');
+                sessionStorage.setItem('youtube_auth_code', code);
+                window.history.replaceState({}, document.title, '/app.html');
+            } else {
+                const wasConnected = sessionStorage.getItem('youtube_connected');
+                if (wasConnected) {
+                    showConnectedState();
+                    updateStep(4);
+                } else {
+                    showDisconnectedState();
+                }
+            }
+        }
+
+        function showConnectedState() {
+            const youtubeCard = document.getElementById('youtubeStatus');
+            youtubeCard.className = 'account-card glass-card p-4 rounded-lg border-l-4 border-red-500 relative overflow-hidden bg-red-500/10';
+            youtubeCard.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center"><i class="fab fa-youtube text-white"></i></div>
+                        <div><div class="font-bold text-white">YouTube</div><div class="text-xs text-gray-400">Connected • Ready</div></div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        <button onclick="syncYouTube()" class="text-cyan-400 hover:text-cyan-300" title="Sync"><i class="fas fa-sync-alt" id="sync-youtube"></i></button>
+                        <button onclick="disconnectYouTube()" class="text-red-400 hover:text-red-300" title="Disconnect"><i class="fas fa-unlink"></i></button>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-white/10 flex justify-between text-xs text-gray-500"><span>Last sync: just now</span><span class="text-green-400">● Active</span></div>
+            `;
+            document.getElementById('goLiveSection').classList.remove('hidden');
+        }
+
+        function showDisconnectedState() {
+            const youtubeCard = document.getElementById('youtubeStatus');
+            youtubeCard.className = 'account-card glass-card p-4 rounded-lg border-l-4 border-gray-600 relative overflow-hidden';
+            youtubeCard.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center"><i class="fab fa-youtube text-gray-400"></i></div>
+                        <div><div class="font-bold text-gray-400">YouTube</div><div class="text-xs text-gray-500">Not connected</div></div>
+                    </div>
+                    <span class="text-xs text-gray-500">● Offline</span>
+                </div>
+            `;
+            document.getElementById('goLiveSection').classList.add('hidden');
+            updateStep(1);
+        }
+
+        function syncYouTube() {
+            const icon = document.getElementById('sync-youtube');
+            icon.classList.add('sync-indicator');
+            setTimeout(() => icon.classList.remove('sync-indicator'), 2000);
+        }
+
+        function disconnectYouTube() {
+            if (confirm('Disconnect YouTube?')) {
+                sessionStorage.removeItem('youtube_connected');
+                sessionStorage.removeItem('youtube_auth_code');
+                showDisconnectedState();
+            }
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = '/';
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const passed = await checkDevice();
+            if (passed) handleCallback();
+        });
+    </script>
+</body>
+</html>
