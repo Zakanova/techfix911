@@ -7,61 +7,46 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            min-height: 100vh;
+            background: #0a0a0f;
+            color: white;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: white;
-            text-align: center;
+            min-height: 100vh;
+            margin: 0;
         }
         .loader {
             width: 50px;
             height: 50px;
-            border: 4px solid rgba(255,0,0,0.3);
-            border-top-color: #ff0000;
+            border: 3px solid rgba(0, 243, 255, 0.3);
+            border-top-color: #00f3ff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 20px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .error { color: #ff6b6b; max-width: 400px; padding: 20px; }
-        .success { color: #51cf66; }
     </style>
 </head>
 <body>
     <div class="loader"></div>
-    <h2 id="message">Connecting to YouTube...</h2>
-    <p id="detail">Please wait while we complete the setup.</p>
+    <h2>Completing Connection...</h2>
+    <p>Redirecting back to TechFix 911</p>
 
     <script>
-        async function handleCallback() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-            const error = urlParams.get('error');
-            
-            if (error) {
-                document.getElementById('message').textContent = 'Connection Failed';
-                document.getElementById('detail').innerHTML = `<span class="error">Error: ${error}</span>`;
-                return;
-            }
-            
-            if (code) {
-                document.getElementById('message').innerHTML = '<span class="success">✓ Authorization Successful!</span>';
-                document.getElementById('detail').textContent = 'You can now close this window.';
-                
-                sessionStorage.setItem('youtube_auth_code', code);
-                
-                setTimeout(() => {
-                    window.location.href = '/dashboard.html';
-                }, 2000);
-            } else {
-                window.location.href = '/';
-            }
-        }
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const error = urlParams.get('error');
         
-        handleCallback();
+        if (error) {
+            alert('Connection failed: ' + error);
+            window.location.href = '/';
+        } else if (code) {
+            // Redirect back to main page with code
+            window.location.href = '/?code=' + code;
+        } else {
+            window.location.href = '/';
+        }
     </script>
 </body>
 </html>
