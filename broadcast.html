@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechFix 911 - Live Broadcast</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-red: #ff0040;
+            --neon-cyan: #00f3ff;
+            --dark-bg: #0a0a0f;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: #fff;
+        }
+        
+        .font-cyber { font-family: 'Orbitron', sans-serif; }
+        
+        .live-pulse {
+            animation: livePulse 2s infinite;
+        }
+        
+        @keyframes livePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 64, 0.7); }
+            50% { box-shadow: 0 0 20px 10px rgba(255, 0, 64, 0); }
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stream-preview {
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
+            aspect-ratio: 16/9;
+        }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header -->
+    <nav class="border-b border-white/10 bg-black/50 backdrop-blur-md fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-red-600 flex items-center justify-center live-pulse">
+                    <i class="fas fa-broadcast-tower text-white"></i>
+                </div>
+                <div>
+                    <h1 class="font-cyber text-xl font-bold">TechFix 911</h1>
+                    <p class="text-xs text-gray-400">Live Broadcast Studio</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div id="connectionStatus" class="flex items-center gap-2 text-sm text-gray-400">
+                    <span class="w-2 h-2 rounded-full bg-gray-500"></span>
+                    Offline
+                </div>
+                <button onclick="window.location.href='/'" class="text-sm text-gray-400 hover:text-white">
+                    <i class="fas fa-cog"></i> Settings
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-6 px-4 max-w-7xl mx-auto">
+        
+        <!-- Not Connected Warning -->
+        <div id="notConnected" class="glass-panel rounded-2xl p-8 text-center mb-6">
+            <div class="w-20 h-20 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4">
+                <i class="fab fa-youtube text-4xl text-gray-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-2">Connect YouTube to Go Live</h2>
+            <p class="text-gray-400 mb-6">You need to connect your YouTube channel before you can start streaming.</p>
+            <button onclick="window.location.href='/'" class="px-8 py-3 rounded-full bg-gradient-to-r from-red-600 to-red-800 text-white font-bold hover:from-red-500 hover:to-red-700 transition">
+                <i class="fab fa-youtube mr-2"></i> Connect YouTube
+            </button>
+        </div>
+
+        <!-- Broadcast Interface (Hidden until connected) -->
+        <div id="broadcastInterface" class="hidden">
+            
+            <!-- Top Bar -->
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-4">
+                    <button id="goLiveBtn" onclick="toggleStream()" class="px-8 py-4 rounded-full bg-red-600 text-white font-bold text-lg flex items-center gap-3 hover:bg-red-500 transition live-pulse">
+                        <i class="fas fa-circle text-sm"></i>
+                        GO LIVE
+                    </button>
+                    <button id="endStreamBtn" onclick="toggleStream()" class="hidden px-8 py-4 rounded-full bg-gray-700 text-white font-bold text-lg flex items-center gap-3 hover:bg-gray-600 transition">
+                        <i class="fas fa-stop text-sm"></i>
+                        END STREAM
+                    </button>
+                </div>
+                
+                <div class="flex items-center gap-6 text-sm">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-white" id="viewerCount">0</div>
+                        <div class="text-gray-400 text-xs">Viewers</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-white" id="streamDuration">00:00</div>
+                        <div class="text-gray-400 text-xs">Duration</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-6">
+                
+                <!-- Main Preview -->
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="stream-preview rounded-2xl flex items-center justify-center relative overflow-hidden border border-white/10">
+                        <div id="offlineMessage" class="text-center">
+                            <i class="fas fa-video text-6xl text-gray-700 mb-4"></i>
+                            <p class="text-gray-500">Camera preview will appear here</p>
+                        </div>
+                        <video id="cameraPreview" class="hidden w-full h-full object-cover" autoplay muted></video>
+                        <div id="liveBadge" class="hidden absolute top-4 left-4 px-3 py-1 bg-red-600 text-white text-sm font-bold rounded flex items-center gap-2">
+                            <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                            LIVE
+                        </div>
+                    </div>
+
+                    <!-- Stream Info -->
+                    <div class="glass-panel rounded-xl p-4">
+                        <input type="text" id="streamTitle" placeholder="Enter stream title..." 
+                               class="w-full bg-transparent border-b border-white/20 pb-2 text-xl font-bold focus:outline-none focus:border-red-500 transition mb-3">
+                        <textarea id="streamDescription" placeholder="Stream description..." rows="2"
+                                  class="w-full bg-transparent text-sm text-gray-400 focus:outline-none resize-none"></textarea>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="space-y-4">
+                    
+                    <!-- Stream Health -->
+                    <div class="glass-panel rounded-xl p-4">
+                        <h3 class="font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-heartbeat text-green-400"></i>
+                            Stream Health
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">Status</span>
+                                <span id="streamStatus" class="text-gray-500">Offline</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">Quality</span>
+                                <span class="text-green-400">1080p60</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">Bitrate</span>
+                                <span class="text-cyan-400">6,000 kbps</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">Latency</span>
+                                <span class="text-green-400">Low</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat -->
+                    <div class="glass-panel rounded-xl p-4 h-96 flex flex-col">
+                        <h3 class="font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-comments text-cyan-400"></i>
+                            Live Chat
+                        </h3>
+                        <div id="chatMessages" class="flex-1 overflow-y-auto space-y-2 text-sm mb-4">
+                            <div class="text-gray-500 text-center italic">Chat will appear when live...</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="chatInput" placeholder="Say something..." 
+                                   class="flex-1 bg-white/5 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <button onclick="sendChat()" class="px-4 py-2 bg-red-600 rounded-lg hover:bg-red-500 transition">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="glass-panel rounded-xl p-4">
+                        <h3 class="font-bold mb-4">Quick Actions</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button class="p-3 rounded-lg bg-white/5 hover:bg-white/10 transition text-sm">
+                                <i class="fas fa-microphone-slash block mb-1"></i>
+                                Mute
+                            </button>
+                            <button class="p-3 rounded-lg bg-white/5 hover:bg-white/10 transition text-sm">
+                                <i class="fas fa-desktop block mb-1"></i>
+                                Screen
+                            </button>
+                            <button class="p-3 rounded-lg bg-white/5 hover:bg-white/10 transition text-sm">
+                                <i class="fas fa-image block mb-1"></i>
+                                Scene
+                            </button>
+                            <button class="p-3 rounded-lg bg-white/5 hover:bg-white/10 transition text-sm">
+                                <i class="fas fa-cog block mb-1"></i>
+                                Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let isStreaming = false;
+        let streamInterval;
+        let duration = 0;
+
+        // Check if YouTube is connected
+        function checkConnection() {
+            const connected = sessionStorage.getItem('youtube_connected');
+            if (connected) {
+                document.getElementById('notConnected').classList.add('hidden');
+                document.getElementById('broadcastInterface').classList.remove('hidden');
+                document.getElementById('connectionStatus').innerHTML = 
+                    '<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Connected';
+                document.getElementById('connectionStatus').classList.remove('text-gray-400');
+                document.getElementById('connectionStatus').classList.add('text-green-400');
+            }
+        }
+
+        // Toggle Stream
+        async function toggleStream() {
+            if (!isStreaming) {
+                // Start streaming
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    document.getElementById('cameraPreview').srcObject = stream;
+                    document.getElementById('cameraPreview').classList.remove('hidden');
+                    document.getElementById('offlineMessage').classList.add('hidden');
+                    document.getElementById('liveBadge').classList.remove('hidden');
+                    
+                    document.getElementById('goLiveBtn').classList.add('hidden');
+                    document.getElementById('endStreamBtn').classList.remove('hidden');
+                    
+                    document.getElementById('streamStatus').textContent = 'Live';
+                    document.getElementById('streamStatus').classList.remove('text-gray-500');
+                    document.getElementById('streamStatus').classList.add('text-green-400');
+                    
+                    isStreaming = true;
+                    startTimer();
+                    simulateViewers();
+                    simulateChat();
+                    
+                } catch (err) {
+                    alert('Camera access denied. Please allow camera access to stream.');
+                }
+            } else {
+                // Stop streaming
+                const video = document.getElementById('cameraPreview');
+                const stream = video.srcObject;
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                
+                video.classList.add('hidden');
+                document.getElementById('offlineMessage').classList.remove('hidden');
+                document.getElementById('liveBadge').classList.add('hidden');
+                
+                document.getElementById('goLiveBtn').classList.remove('hidden');
+                document.getElementById('endStreamBtn').classList.add('hidden');
+                
+                document.getElementById('streamStatus').textContent = 'Offline';
+                document.getElementById('streamStatus').classList.add('text-gray-500');
+                document.getElementById('streamStatus').classList.remove('text-green-400');
+                
+                isStreaming = false;
+                clearInterval(streamInterval);
+                duration = 0;
+                document.getElementById('streamDuration').textContent = '00:00';
+                document.getElementById('viewerCount').textContent = '0';
+            }
+        }
+
+        function startTimer() {
+            streamInterval = setInterval(() => {
+                duration++;
+                const mins = Math.floor(duration / 60).toString().padStart(2, '0');
+                const secs = (duration % 60).toString().padStart(2, '0');
+                document.getElementById('streamDuration').textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function simulateViewers() {
+            setInterval(() => {
+                if (isStreaming) {
+                    const viewers = Math.floor(Math.random() * 50) + 10;
+                    document.getElementById('viewerCount').textContent = viewers;
+                }
+            }, 5000);
+        }
+
+        function simulateChat() {
+            const messages = [
+                { user: 'TechFan123', msg: 'Great stream!' },
+                { user: 'FixItPro', msg: 'Can you help with my PC?' },
+                { user: 'Newbie2024', msg: 'Hello from Dubai!' },
+                { user: 'GamerX', msg: 'Audio is clear 👍' }
+            ];
+            
+            let i = 0;
+            setInterval(() => {
+                if (isStreaming && i < messages.length) {
+                    addChatMessage(messages[i].user, messages[i].msg);
+                    i++;
+                }
+            }, 3000);
+        }
+
+        function addChatMessage(user, msg) {
+            const chat = document.getElementById('chatMessages');
+            if (chat.children[0]?.classList.contains('text-center')) {
+                chat.innerHTML = '';
+            }
+            
+            const div = document.createElement('div');
+            div.className = 'flex gap-2';
+            div.innerHTML = `
+                <span class="font-bold text-cyan-400">${user}:</span>
+                <span class="text-gray-300">${msg}</span>
+            `;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function sendChat() {
+            const input = document.getElementById('chatInput');
+            if (input.value.trim()) {
+                addChatMessage('You', input.value);
+                input.value = '';
+            }
+        }
+
+        // Enter key for chat
+        document.getElementById('chatInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendChat();
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', checkConnection);
+    </script>
+</body>
+</html>
